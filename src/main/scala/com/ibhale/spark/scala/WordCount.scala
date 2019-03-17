@@ -1,27 +1,22 @@
 package com.ibhale.spark.scala
+import org.apache.spark._
 
-import org.apache.spark.sql.SparkSession
-
+// Word count using map reduce
 object WordCount{
   
-  def executeWordCount(sparkSession:SparkSession)
+  def executeWordCount(sc:SparkContext)
   {
     println("starting word count process ")
     
-    //Reading input file and creating rdd with no of partitions 5
-    val bookRDD=sparkSession.sparkContext.textFile("resources//input.txt", 4)
-    
-    //Regex to clean text
-    val pat = """[^\w\s\$]"""
-    val cleanBookRDD=bookRDD.map(line=>line.replaceAll(pat, ""))
-    
-    val wordsRDD=cleanBookRDD.flatMap(line=>line.split(" "))
-    
-    val wordMapRDD=wordsRDD.map(word=>(word->1))
-    
-    val wordCountMapRDD=wordMapRDD.reduceByKey(_+_)
-    
-    wordCountMapRDD.saveAsTextFile("outputfiles//wordCount//wordcount.txt")
+    //create RDD from input file
+    val test = sc.textFile("./src/main/resources/input.txt")
+
+    test.flatMap { line => //separate lines
+      line.split(" ") //delimiter for word
+    }
+      .map { word =>(word, 1) } //count words
+      .reduceByKey(_ + _) //compute sum of same words
+    //  .saveAsTextFile("./src/main/resources/output.txt") //Save to a text file
     
     
     
